@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculateur Assurance Vie | GC Groupe Conseil</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0D1B2A;
+    --navy-mid: #162336;
+    --navy-light: #1e3050;
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-pale: #F5EDD8;
+    --white: #FFFFFF;
+    --off-white: #F8F6F1;
+    --text-dark: #0D1B2A;
+    --text-mid: #3D526A;
+    --text-light: #7A8FA8;
+    --border: #DDD8CE;
+    --success: #2E7D5B;
+    --error: #B94040;
+    --shadow: 0 4px 24px rgba(13,27,42,0.10);
+    --shadow-lg: 0 12px 48px rgba(13,27,42,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--off-white);
+    color: var(--text-dark);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--navy);
+    padding: 20px 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%);
+  }
+  .header-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.3;
+  }
+  .header-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 4px;
+    font-weight: 300;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap {
+    background: var(--navy-mid);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .progress-bar-bg {
+    flex: 1;
+    height: 3px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    border-radius: 2px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+  }
+  .progress-label {
+    font-size: 11px;
+    color: var(--gold);
+    font-weight: 600;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    min-width: 60px;
+    text-align: right;
+  }
+
+  /* ── MAIN CONTAINER ── */
+  .container {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 0 60px;
+  }
+
+  /* ── STEP CARD ── */
+  .step {
+    display: none;
+    animation: fadeUp 0.4s ease both;
+  }
+  .step.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-card {
+    background: var(--white);
+    margin: 24px 16px 0;
+    border-radius: 16px;
+    padding: 28px 24px 32px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+
+  .step-number {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .step-number span {
+    width: 20px; height: 20px;
+    background: var(--gold);
+    color: var(--navy);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+  }
+
+  .step-question {
+    font-family: 'Playfair Display', serif;
+    font-size: 21px;
+    font-weight: 600;
+    color: var(--navy);
+    line-height: 1.35;
+    margin-bottom: 6px;
+  }
+  .step-hint {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-bottom: 22px;
+    font-weight: 300;
+  }
+
+  /* ── OPTION BUTTONS ── */
+  .options-grid {
+    display: grid;
+    gap: 10px;
+  }
+  .options-grid.two-col { grid-template-columns: 1fr 1fr; }
+  .options-grid.three-col { grid-template-columns: 1fr 1fr 1fr; }
+
+  .opt-btn {
+    background: var(--off-white);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+  }
+  .opt-btn:hover {
+    border-color: var(--gold);
+    background: var(--gold-pale);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(201,168,76,0.15);
+  }
+  .opt-btn.selected {
+    border-color: var(--gold);
+    background: var(--gold-pale);
+    box-shadow: 0 0 0 2px rgba(201,168,76,0.3);
+  }
+  .opt-btn.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 8px; right: 10px;
+    font-size: 12px;
+    color: var(--gold);
+    font-weight: 700;
+  }
+  .opt-icon {
+    font-size: 20px;
+    margin-bottom: 6px;
+    display: block;
+  }
+  .opt-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    display: block;
+  }
+  .opt-sub {
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 2px;
+    display: block;
+    line-height: 1.4;
+  }
+
+  /* ── TERME BUTTONS (pour temporaire) ── */
+  .terme-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .terme-btn {
+    flex: 1;
+    min-width: 70px;
+    background: var(--off-white);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 8px;
+    cursor: pointer;
+    text-align: center;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--navy);
+    transition: all 0.2s;
+  }
+  .terme-btn:hover, .terme-btn.selected {
+    border-color: var(--gold);
+    background: var(--gold-pale);
+    color: var(--navy);
+  }
+  .terme-btn.selected {
+    box-shadow: 0 0 0 2px rgba(201,168,76,0.3);
+  }
+
+  /* ── MONTANT SLIDER ── */
+  .montant-display {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--navy);
+    border-radius: 12px;
+  }
+  .montant-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+  .montant-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .slider-wrap { padding: 0 4px; }
+  input[type=range] {
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: linear-gradient(90deg, var(--gold) 0%, var(--border) 0%);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    background: var(--gold);
+    border-radius: 50%;
+    border: 3px solid var(--white);
+    box-shadow: 0 2px 8px rgba(201,168,76,0.4);
+    cursor: pointer;
+  }
+  .slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 8px;
+    font-size: 11px;
+    color: var(--text-light);
+  }
+
+  /* ── TOGGLE OUI/NON ── */
+  .yesno-wrap {
+    display: flex;
+    gap: 12px;
+  }
+  .yesno-btn {
+    flex: 1;
+    padding: 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--off-white);
+    cursor: pointer;
+    text-align: center;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--navy);
+    transition: all 0.2s;
+  }
+  .yesno-btn:hover { border-color: var(--gold); background: var(--gold-pale); }
+  .yesno-btn.selected { border-color: var(--gold); background: var(--gold-pale); box-shadow: 0 0 0 2px rgba(201,168,76,0.3); }
+  .yesno-btn .yesno-icon { font-size: 24px; display: block; margin-bottom: 4px; }
+
+  /* ── AVERTISSEMENT santé ── */
+  .health-note {
+    display: none;
+    margin-top: 14px;
+    padding: 12px 14px;
+    background: #FFF8E8;
+    border: 1px solid #E8C97A;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #7A5C00;
+    line-height: 1.5;
+  }
+  .health-note.visible { display: block; }
+
+  /* ── BOUTON SUIVANT ── */
+  .btn-next {
+    width: 100%;
+    margin-top: 24px;
+    padding: 16px;
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.5px;
+  }
+  .btn-next:hover { background: var(--navy-light); transform: translateY(-1px); box-shadow: var(--shadow); }
+  .btn-next:disabled { background: var(--border); cursor: not-allowed; transform: none; box-shadow: none; color: var(--text-light); }
+
+  .btn-back {
+    width: 100%;
+    margin-top: 10px;
+    padding: 12px;
+    background: transparent;
+    color: var(--text-light);
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    transition: color 0.2s;
+  }
+  .btn-back:hover { color: var(--navy); }
+
+  /* ── FORMULAIRE CAPTURE LEAD ── */
+  .capture-card {
+    background: var(--navy);
+    margin: 0 16px;
+    border-radius: 16px;
+    padding: 28px 24px 32px;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+  }
+  .capture-card::before {
+    content: '';
+    position: absolute;
+    bottom: -40px; right: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.12) 0%, transparent 70%);
+  }
+
+  .capture-teaser {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .capture-teaser .icon-lock {
+    width: 52px; height: 52px;
+    background: rgba(201,168,76,0.15);
+    border: 1.5px solid rgba(201,168,76,0.35);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 22px;
+  }
+  .capture-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+  .capture-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 300;
+  }
+
+  .price-preview {
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .price-preview-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .price-preview-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold);
+    filter: blur(6px);
+    transition: filter 0.8s;
+  }
+  .price-preview-value.revealed { filter: blur(0); }
+  .price-preview-per {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    text-align: right;
+  }
+
+  .field-wrap { margin-bottom: 14px; }
+  .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .field-input {
+    width: 100%;
+    padding: 13px 16px;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.12);
+    border-radius: 8px;
+    color: var(--white);
+    font-size: 15px;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .field-input::placeholder { color: rgba(255,255,255,0.25); }
+  .field-input:focus { border-color: var(--gold); }
+
+  .btn-reveal {
+    width: 100%;
+    padding: 17px;
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 100%);
+    color: var(--navy);
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    margin-top: 6px;
+  }
+  .btn-reveal:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,168,76,0.35); }
+
+  .privacy-note {
+    text-align: center;
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+
+  /* ── RÉSULTAT ── */
+  .result-card {
+    background: var(--white);
+    margin: 24px 16px 0;
+    border-radius: 16px;
+    padding: 28px 24px 32px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    display: none;
+    animation: fadeUp 0.5s ease both;
+  }
+  .result-card.active { display: block; }
+
+  .result-header {
+    text-align: center;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .result-check {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 14px;
+    font-size: 22px;
+  }
+  .result-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--navy);
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .result-sub { font-size: 13px; color: var(--text-light); }
+
+  .result-price-main {
+    background: var(--navy);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .result-price-label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; }
+  .result-price-amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .result-price-period { font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 4px; }
+
+  .result-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .detail-item {
+    background: var(--off-white);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .detail-key { font-size: 11px; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+  .detail-val { font-size: 14px; font-weight: 600; color: var(--navy); }
+
+  .result-disclaimer {
+    font-size: 11px;
+    color: var(--text-light);
+    text-align: center;
+    line-height: 1.6;
+    padding: 12px;
+    background: var(--off-white);
+    border-radius: 8px;
+    margin-bottom: 20px;
+  }
+
+  .btn-cta {
+    width: 100%;
+    padding: 17px;
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .btn-cta:hover { background: var(--navy-light); transform: translateY(-1px); box-shadow: var(--shadow); }
+
+  .result-upsell {
+    margin-top: 14px;
+    padding: 14px;
+    background: #FFF8E8;
+    border: 1px solid var(--gold);
+    border-radius: 10px;
+    text-align: center;
+  }
+  .result-upsell p { font-size: 12px; color: #7A5C00; line-height: 1.5; }
+
+  /* ── SUMMARY BAR ── */
+  .summary-bar {
+    background: var(--navy-mid);
+    margin: 16px 16px 0;
+    border-radius: 10px;
+    padding: 10px 16px;
+    display: none;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+  }
+  .summary-bar.visible { display: flex; }
+  .summary-chip {
+    font-size: 11px;
+    color: rgba(255,255,255,0.55);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .summary-chip strong { color: var(--gold-light); font-weight: 600; }
+
+  /* ── LOADING ── */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(13,27,42,0.7);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .loading-overlay.active { display: flex; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid rgba(201,168,76,0.2);
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--white); font-size: 14px; font-weight: 300; }
+
+  @media(max-width:400px) {
+    .options-grid.three-col { grid-template-columns: 1fr 1fr; }
+    .result-price-amount { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Calcul de votre prime en cours…</div>
+</div>
+
+<div class="header">
+  <div class="header-logo">GC Groupe Conseil</div>
+  <div class="header-title">Calculateur d'assurance vie</div>
+  <div class="header-sub">Obtenez votre estimation personnalisée en 2 minutes</div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progressFill" style="width:14%"></div>
+  </div>
+  <div class="progress-label" id="progressLabel">Étape 1/7</div>
+</div>
+
+<div class="container">
+
+  <!-- SUMMARY BAR -->
+  <div class="summary-bar" id="summaryBar"></div>
+
+  <!-- ÉTAPE 1 : SEXE -->
+  <div class="step active" id="step1">
+    <div class="step-card">
+      <div class="step-number"><span>1</span> Profil</div>
+      <div class="step-question">Quel est votre sexe ?</div>
+      <div class="step-hint">Cette information influence le calcul de votre prime.</div>
+      <div class="options-grid two-col" data-group="gender">
+        <button class="opt-btn" data-key="gender" data-val="F">
+          <span class="opt-icon">👩</span>
+          <span class="opt-label">Femme</span>
+        </button>
+        <button class="opt-btn" data-key="gender" data-val="M">
+          <span class="opt-icon">👨</span>
+          <span class="opt-label">Homme</span>
+        </button>
+      </div>
+      <div style="margin-top:10px;" data-group="gender">
+        <button class="opt-btn" style="width:100%;display:flex;align-items:center;gap:10px;" data-key="gender" data-val="NB">
+          <span class="opt-icon" style="margin:0">🧑</span>
+          <span class="opt-label">Autre / Préfère ne pas préciser</span>
+        </button>
+      </div>
+      <button class="btn-next" id="next1" disabled data-nav="2">Continuer →</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 2 : ÂGE -->
+  <div class="step" id="step2">
+    <div class="step-card">
+      <div class="step-number"><span>2</span> Âge</div>
+      <div class="step-question">Quel est votre âge ?</div>
+      <div class="step-hint">Les primes sont calculées à partir de votre âge actuel.</div>
+      <div class="montant-display" style="background:#f8f6f1;padding:12px;">
+        <div class="montant-value" id="ageDisplay" style="color:var(--navy);font-size:48px;">35</div>
+        <div class="montant-label" style="color:var(--text-light)">ans</div>
+      </div>
+      <div class="slider-wrap" style="margin-top:16px;">
+        <input type="range" id="ageSlider" min="18" max="70" value="35" oninput="updateAge(this.value)">
+        <div class="slider-labels"><span>18 ans</span><span>70 ans</span></div>
+      </div>
+      <button class="btn-next" data-nav="3" data-action="setAge">Continuer →</button>
+      <button class="btn-back" data-back="1">← Retour</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 3 : TYPE D'ASSURANCE -->
+  <div class="step" id="step3">
+    <div class="step-card">
+      <div class="step-number"><span>3</span> Type de couverture</div>
+      <div class="step-question">Quel type d'assurance vous intéresse ?</div>
+      <div class="step-hint">Chaque produit répond à un objectif différent.</div>
+      <div class="options-grid" data-group="type">
+        <button class="opt-btn" data-key="type" data-val="temporaire">
+          <span class="opt-icon">⏱️</span>
+          <span class="opt-label">Temporaire</span>
+          <span class="opt-sub">Protection pour une période définie (10, 20, 30 ans). Prime fixe et abordable.</span>
+        </button>
+        <button class="opt-btn" data-key="type" data-val="permanente">
+          <span class="opt-icon">🛡️</span>
+          <span class="opt-label">Permanente</span>
+          <span class="opt-sub">Protection à vie garantie. Idéale pour protéger un patrimoine ou planifier une succession.</span>
+        </button>
+        <button class="opt-btn" data-key="type" data-val="participative">
+          <span class="opt-icon">📈</span>
+          <span class="opt-label">Participative (avec investissement)</span>
+          <span class="opt-sub">Protection + accumulation de valeur. Dividendes potentiels selon les résultats de l'assureur.</span>
+        </button>
+      </div>
+      <div id="termeSection" style="display:none;margin-top:18px;">
+        <div class="step-hint" style="margin-bottom:10px;">Sélectionnez la durée souhaitée :</div>
+        <div class="terme-grid">
+          <button class="terme-btn" data-terme="10">T-10</button>
+          <button class="terme-btn" data-terme="15">T-15</button>
+          <button class="terme-btn" data-terme="20">T-20</button>
+          <button class="terme-btn" data-terme="25">T-25</button>
+          <button class="terme-btn" data-terme="30">T-30</button>
+        </div>
+      </div>
+      <button class="btn-next" id="next3" disabled data-nav="4">Continuer →</button>
+      <button class="btn-back" data-back="2">← Retour</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 4 : MONTANT -->
+  <div class="step" id="step4">
+    <div class="step-card">
+      <div class="step-number"><span>4</span> Montant</div>
+      <div class="step-question">Quel montant de couverture souhaitez-vous ?</div>
+      <div class="step-hint">Le capital décès versé à vos bénéficiaires.</div>
+      <div class="montant-display">
+        <div class="montant-value" id="montantDisplay">250 000 $</div>
+        <div class="montant-label">Capital assuré</div>
+      </div>
+      <div class="slider-wrap">
+        <input type="range" id="montantSlider" min="0" max="199" value="24" step="1" oninput="updateMontant(this.value)">
+        <div class="slider-labels"><span>10 000 $</span><span>2 000 000 $</span></div>
+      </div>
+      <button class="btn-next" data-nav="5" data-action="setMontant">Continuer →</button>
+      <button class="btn-back" data-back="3">← Retour</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 5 : FUMEUR -->
+  <div class="step" id="step5">
+    <div class="step-card">
+      <div class="step-number"><span>5</span> Habitudes de vie</div>
+      <div class="step-question">Êtes-vous fumeur ou non-fumeur ?</div>
+      <div class="step-hint">Inclut cigarettes, cigares, pipe, vaporisateurs (au cours des 12 derniers mois).</div>
+      <div class="yesno-wrap" data-group="smoker">
+        <button class="yesno-btn" data-key="smoker" data-val="N">
+          <span class="yesno-icon">🚭</span>
+          Non-fumeur
+        </button>
+        <button class="yesno-btn" data-key="smoker" data-val="Y">
+          <span class="yesno-icon">🚬</span>
+          Fumeur
+        </button>
+      </div>
+      <button class="btn-next" id="next5" disabled data-nav="6">Continuer →</button>
+      <button class="btn-back" data-back="4">← Retour</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 6 : SANTÉ -->
+  <div class="step" id="step6">
+    <div class="step-card">
+      <div class="step-number"><span>6</span> Santé</div>
+      <div class="step-question">Avez-vous des problèmes de santé connus ?</div>
+      <div class="step-hint">Conditions diagnostiquées, médication régulière, antécédents médicaux significatifs.</div>
+      <div class="yesno-wrap">
+        <button class="yesno-btn" data-health="N">
+          <span class="yesno-icon">✅</span>
+          Non
+        </button>
+        <button class="yesno-btn" data-health="Y">
+          <span class="yesno-icon">⚠️</span>
+          Oui
+        </button>
+      </div>
+      <div class="health-note" id="healthNote">
+        Votre estimation sera quand même calculée. Toutefois, des conditions de santé peuvent entraîner une surprime ou une exclusion. Un conseiller analysera votre situation lors de votre rencontre.
+      </div>
+      <button class="btn-next" id="next6" disabled data-nav="7">Voir mon prix →</button>
+      <button class="btn-back" data-back="5">← Retour</button>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 7 : CAPTURE LEAD -->
+  <div class="step" id="step7">
+    <div class="capture-card">
+      <div class="capture-teaser">
+        <div class="icon-lock">🔒</div>
+        <div class="capture-title">Votre estimation est prête !</div>
+        <div class="capture-sub">Entrez vos coordonnées pour découvrir votre prix</div>
+      </div>
+      <div class="price-preview">
+        <div>
+          <div class="price-preview-label">Prime estimée</div>
+          <div class="price-preview-value" id="priceBlurred">-- $</div>
+        </div>
+        <div class="price-preview-per">par<br>mois</div>
+      </div>
+      <div class="field-wrap">
+        <div class="field-label">Prénom et nom</div>
+        <input class="field-input" type="text" id="leadNom" placeholder="Jean Tremblay">
+      </div>
+      <div class="field-wrap">
+        <div class="field-label">Courriel</div>
+        <input class="field-input" type="email" id="leadEmail" placeholder="jean@exemple.com">
+      </div>
+      <div class="field-wrap">
+        <div class="field-label">Téléphone</div>
+        <input class="field-input" type="tel" id="leadTel" placeholder="(514) 000-0000">
+      </div>
+      <button class="btn-reveal" id="btnReveal">🔓 Découvrir mon prix</button>
+      <div class="privacy-note">🔒 Vos informations sont confidentielles et ne seront jamais vendues ou partagées.</div>
+    </div>
+    <button class="btn-back" data-back="6" style="color:rgba(255,255,255,0.4);margin-top:6px;">← Retour</button>
+  </div>
+
+  <!-- RÉSULTAT -->
+  <div class="result-card" id="resultCard">
+    <div class="result-header">
+      <div class="result-check">✓</div>
+      <div class="result-title">Votre estimation personnalisée</div>
+      <div class="result-sub" id="resultName"></div>
+    </div>
+    <div class="result-price-main">
+      <div class="result-price-label">Prime mensuelle estimée</div>
+      <div class="result-price-amount" id="resultAmount"></div>
+      <div class="result-price-period">par mois, taxes incluses</div>
+    </div>
+    <div class="result-details" id="resultDetails"></div>
+    <div class="result-disclaimer">
+      ⚠️ Cette estimation est basée sur un profil standard en bonne santé. Le prix réel peut varier selon votre dossier médical complet. Un conseiller vous contactera pour confirmer votre tarif exact.
+    </div>
+    <button class="btn-cta" id="btnCta">📅 Parler à un conseiller gratuitement</button>
+    <div class="result-upsell" id="resultUpsell" style="display:none">
+      <p id="upsellText"></p>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ── DONNÉES ──
+const answers = {
+  gender: null, age: 35, type: null, terme: null,
+  montant: 250000, smoker: null, health: null
+};
+
+const MONTANT_MIN = 10000;
+const MONTANT_MAX = 2000000;
+const MONTANT_STEP = 10000;
+const MONTANT_STEPS = Array.from({length: (MONTANT_MAX - MONTANT_MIN) / MONTANT_STEP + 1}, (_, i) => MONTANT_MIN + i * MONTANT_STEP);
+
+const RATES_TEMP_BASE = { 10:29.25, 15:40.05, 20:45.90, 25:67.05, 30:89.55 };
+
+const AGE_FACTOR_TEMP = {
+  18:0.28,19:0.29,20:0.30,21:0.31,22:0.32,23:0.33,24:0.34,25:0.35,
+  26:0.37,27:0.39,28:0.41,29:0.43,30:0.46,31:0.49,32:0.52,33:0.56,
+  34:0.60,35:0.65,36:0.70,37:0.76,38:0.83,39:0.91,40:1.00,41:1.10,
+  42:1.21,43:1.33,44:1.46,45:1.61,46:1.78,47:1.97,48:2.18,49:2.41,
+  50:2.67,51:2.95,52:3.26,53:3.60,54:3.98,55:4.40,56:4.86,57:5.36,
+  58:5.91,59:6.51,60:7.17,61:7.89,62:8.67,63:9.51,64:10.42,65:11.40,
+  66:12.45,67:13.58,68:14.79,69:16.09,70:17.49
+};
+
+const GENDER_FACTOR = { F:0.85, M:1.00, NB:0.92 };
+const SMOKER_FACTOR = { N:1.00, Y:2.35 };
+const RATES_PERM_BASE = { T100:389.70 };
+const RATES_PAR_BASE  = { PAR100:760.50 };
+
+function calcPrime() {
+  var gender=answers.gender, age=answers.age, type=answers.type,
+      terme=answers.terme, montant=answers.montant,
+      smoker=answers.smoker, health=answers.health;
+  var ageFactor  = AGE_FACTOR_TEMP[age]  || 1.0;
+  var gFactor    = GENDER_FACTOR[gender] || 1.0;
+  var sFactor    = SMOKER_FACTOR[smoker] || 1.0;
+  var healthMult = (health === 'Y') ? 1.30 : 1.0;
+  var montantFactor = montant / 500000;
+  var prime = 0, produit = '';
+
+  if (type === 'temporaire') {
+    var t = terme || 20;
+    var baseRate = RATES_TEMP_BASE[t] || RATES_TEMP_BASE[20];
+    prime = baseRate * ageFactor * gFactor * sFactor * montantFactor * healthMult;
+    produit = 'Multiterme T-' + t;
+  } else if (type === 'permanente') {
+    prime = RATES_PERM_BASE.T100 * ageFactor * gFactor * sFactor * montantFactor * healthMult;
+    produit = 'Vie permanente T100';
+  } else if (type === 'participative') {
+    prime = RATES_PAR_BASE.PAR100 * ageFactor * gFactor * sFactor * montantFactor * healthMult;
+    produit = 'Vie participative (PAR)';
+  }
+  prime = Math.round(prime / 0.05) * 0.05;
+  return { prime: prime, produit: produit };
+}
+
+function formatMontant(n) {
+  return n.toLocaleString('fr-CA') + '\u00a0$';
+}
+function formatPrime(p) {
+  return p.toFixed(2).replace('.', ',') + '\u00a0$';
+}
+
+// ── NAVIGATION ──
+var currentStep = 1;
+
+function updateProgress(step) {
+  var pct = Math.round((step / 7) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = 'Étape ' + step + '/7';
+}
+
+function goNext(step) {
+  document.getElementById('step' + currentStep).classList.remove('active');
+  currentStep = step;
+  document.getElementById('step' + currentStep).classList.add('active');
+  updateProgress(step);
+  updateSummaryBar();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (step === 7) {
+    var r = calcPrime();
+    document.getElementById('priceBlurred').textContent = formatPrime(r.prime);
+  }
+}
+
+function goBack(step) {
+  document.getElementById('step' + currentStep).classList.remove('active');
+  currentStep = step;
+  document.getElementById('step' + currentStep).classList.add('active');
+  updateProgress(step);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── SLIDER ÂGE ──
+function updateAge(val) {
+  document.getElementById('ageDisplay').textContent = val;
+  var pct = (val - 18) / (70 - 18) * 100;
+  var slider = document.getElementById('ageSlider');
+  slider.style.background = 'linear-gradient(90deg, var(--gold) ' + pct + '%, var(--border) ' + pct + '%)';
+}
+
+// ── SLIDER MONTANT ──
+function updateMontant(idx) {
+  var val = MONTANT_STEPS[idx];
+  document.getElementById('montantDisplay').textContent = formatMontant(val);
+  var pct = idx / 199 * 100;
+  var slider = document.getElementById('montantSlider');
+  slider.style.background = 'linear-gradient(90deg, var(--gold) ' + pct + '%, var(--border) ' + pct + '%)';
+}
+
+// ── SUMMARY BAR ──
+function updateSummaryBar() {
+  var bar = document.getElementById('summaryBar');
+  var chips = [];
+  if (answers.gender) chips.push('Sexe: <strong>' + (answers.gender==='F'?'Femme':answers.gender==='M'?'Homme':'Autre') + '</strong>');
+  if (answers.age)    chips.push('Âge: <strong>' + answers.age + ' ans</strong>');
+  if (answers.type) {
+    var tLabel = answers.type==='temporaire' ? ('Temporaire' + (answers.terme ? ' T-'+answers.terme : ''))
+               : answers.type==='permanente' ? 'Permanente' : 'Participative';
+    chips.push('Type: <strong>' + tLabel + '</strong>');
+  }
+  if (answers.montant) chips.push('Montant: <strong>' + formatMontant(answers.montant) + '</strong>');
+  if (chips.length > 0) {
+    bar.classList.add('visible');
+    bar.innerHTML = chips.map(function(c){ return '<span class="summary-chip">'+c+'</span>'; }).join('');
+  }
+}
+
+// ── EVENT DELEGATION — tout passe par document ──
+document.addEventListener('click', function(e) {
+  var target = e.target;
+
+  // Remonter si clic sur enfant d'un bouton
+  var btn = target.closest('button');
+  if (!btn) return;
+
+  // ── Boutons opt-btn (gender, type) ──
+  if (btn.classList.contains('opt-btn') && btn.dataset.key) {
+    var key = btn.dataset.key;
+    var val = btn.dataset.val;
+    // Désélectionner tous les boutons du même groupe dans ce step
+    var stepEl = btn.closest('[id^="step"]');
+    if (stepEl) {
+      stepEl.querySelectorAll('.opt-btn[data-key="'+key+'"]').forEach(function(b){
+        b.classList.remove('selected');
+      });
+    }
+    btn.classList.add('selected');
+    answers[key] = val;
+
+    // Activer next
+    if (key === 'gender') {
+      var n1 = document.getElementById('next1');
+      if (n1) n1.disabled = false;
+    }
+    if (key === 'smoker') {
+      var n5 = document.getElementById('next5');
+      if (n5) n5.disabled = false;
+    }
+    if (key === 'type') {
+      var termeSection = document.getElementById('termeSection');
+      if (val === 'temporaire') {
+        termeSection.style.display = 'block';
+        // next3 reste désactivé jusqu'au choix du terme
+      } else {
+        termeSection.style.display = 'none';
+        answers.terme = null;
+        var n3 = document.getElementById('next3');
+        if (n3) n3.disabled = false;
+      }
+    }
+    return;
+  }
+
+  // ── Boutons yesno-btn (smoker, déjà géré via data-key ci-dessus) ──
+  if (btn.classList.contains('yesno-btn') && btn.dataset.key) {
+    var key2 = btn.dataset.key;
+    var val2 = btn.dataset.val;
+    var wrap = btn.closest('.yesno-wrap');
+    if (wrap) wrap.querySelectorAll('.yesno-btn').forEach(function(b){ b.classList.remove('selected'); });
+    btn.classList.add('selected');
+    answers[key2] = val2;
+    if (key2 === 'smoker') {
+      var n5b = document.getElementById('next5');
+      if (n5b) n5b.disabled = false;
+    }
+    return;
+  }
+
+  // ── Bouton santé (data-health) ──
+  if (btn.dataset.health !== undefined) {
+    var val3 = btn.dataset.health;
+    var wrap3 = btn.closest('.yesno-wrap');
+    if (wrap3) wrap3.querySelectorAll('.yesno-btn').forEach(function(b){ b.classList.remove('selected'); });
+    btn.classList.add('selected');
+    answers.health = val3;
+    var n6 = document.getElementById('next6');
+    if (n6) n6.disabled = false;
+    var note = document.getElementById('healthNote');
+    if (note) note.classList.toggle('visible', val3 === 'Y');
+    return;
+  }
+
+  // ── Boutons terme (data-terme) ──
+  if (btn.classList.contains('terme-btn') && btn.dataset.terme !== undefined) {
+    document.querySelectorAll('.terme-btn').forEach(function(b){ b.classList.remove('selected'); });
+    btn.classList.add('selected');
+    answers.terme = parseInt(btn.dataset.terme);
+    var n3b = document.getElementById('next3');
+    if (n3b) n3b.disabled = false;
+    return;
+  }
+
+  // ── Boutons navigation (data-nav) ──
+  if (btn.dataset.nav !== undefined) {
+    var nextStep = parseInt(btn.dataset.nav);
+    if (btn.dataset.action === 'setAge') {
+      answers.age = parseInt(document.getElementById('ageSlider').value);
+    }
+    if (btn.dataset.action === 'setMontant') {
+      answers.montant = MONTANT_STEPS[parseInt(document.getElementById('montantSlider').value)];
+    }
+    goNext(nextStep);
+    return;
+  }
+
+  // ── Boutons retour (data-back) ──
+  if (btn.dataset.back !== undefined) {
+    goBack(parseInt(btn.dataset.back));
+    return;
+  }
+
+  // ── Bouton reveal ──
+  if (btn.id === 'btnReveal') {
+    revealPrice();
+    return;
+  }
+
+  // ── Bouton CTA ──
+  if (btn.id === 'btnCta') {
+    bookMeeting();
+    return;
+  }
+});
+
+// ── SLIDER EVENTS ──
+document.addEventListener('input', function(e) {
+  if (e.target.id === 'ageSlider')    updateAge(e.target.value);
+  if (e.target.id === 'montantSlider') updateMontant(e.target.value);
+});
+
+// ── REVEAL PRICE ──
+function revealPrice() {
+  var nom   = document.getElementById('leadNom').value.trim();
+  var email = document.getElementById('leadEmail').value.trim();
+  var tel   = document.getElementById('leadTel').value.trim();
+  if (!nom || !email || !tel) {
+    alert('Veuillez remplir tous les champs pour découvrir votre estimation.');
+    return;
+  }
+  if (email.indexOf('@') === -1) {
+    alert('Veuillez entrer une adresse courriel valide.');
+    return;
+  }
+  document.getElementById('loadingOverlay').classList.add('active');
+  sendToGHL({ nom:nom, email:email, tel:tel });
+  setTimeout(function() {
+    document.getElementById('loadingOverlay').classList.remove('active');
+    showResult(nom);
+  }, 1800);
+}
+
+function sendToGHL(data) {
+  var webhookUrl = 'https://services.leadconnectorhq.com/hooks/efkpsCi88xsnw3sWiruZ/webhook-trigger/ab696799-a576-4533-adec-4c5dfc0be313';
+  var typeLabels   = { temporaire:'Temporaire', permanente:'Permanente', participative:'Participative' };
+  var smokerLabels = { N:'Non-fumeur', Y:'Fumeur' };
+  var genderLabels = { F:'Femme', M:'Homme', NB:'Autre' };
+  var r = calcPrime();
+  var nomParts = data.nom.split(' ');
+
+  var formData = new URLSearchParams();
+  formData.append('first_name', nomParts[0] || '');
+  formData.append('last_name', nomParts.slice(1).join(' ') || '');
+  formData.append('email', data.email);
+  formData.append('phone', data.tel);
+  formData.append('source', 'Calculateur Assurance Vie');
+  formData.append('sexe', genderLabels[answers.gender] || answers.gender);
+  formData.append('age', String(answers.age));
+  formData.append('type_assurance', typeLabels[answers.type] || answers.type);
+  formData.append('terme', answers.terme ? 'T-' + answers.terme : 'N/A');
+  formData.append('montant_couverture', formatMontant(answers.montant));
+  formData.append('statut_fumeur', smokerLabels[answers.smoker] || answers.smoker);
+  formData.append('problemes_sante', answers.health === 'Y' ? 'Oui' : 'Non');
+  formData.append('prime_estimee', formatPrime(r.prime) + '/mois');
+  formData.append('produit_suggere', r.produit);
+
+  fetch(webhookUrl, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: formData.toString()
+  }).catch(function(e) { console.warn('Webhook GHL:', e); });
+}
+
+function showResult(nom) {
+  document.getElementById('step7').classList.remove('active');
+  var r = calcPrime();
+  var prenom = nom.split(' ')[0];
+  document.getElementById('resultName').textContent = 'Bonjour ' + prenom + ', voici votre estimation selon vos critères';
+  document.getElementById('resultAmount').textContent = formatPrime(r.prime);
+  var typeLabels   = { temporaire:'Temporaire', permanente:'Permanente', participative:'Participative' };
+  var smokerLabels = { N:'Non-fumeur', Y:'Fumeur' };
+  var details = [
+    { k:'Type',    v: (typeLabels[answers.type]||answers.type) + (answers.terme ? ' T-'+answers.terme : '') },
+    { k:'Montant', v: formatMontant(answers.montant) },
+    { k:'Produit', v: r.produit },
+    { k:'Statut',  v: smokerLabels[answers.smoker]||answers.smoker }
+  ];
+  document.getElementById('resultDetails').innerHTML = details.map(function(d){
+    return '<div class="detail-item"><div class="detail-key">'+d.k+'</div><div class="detail-val">'+d.v+'</div></div>';
+  }).join('');
+  var upsell = document.getElementById('resultUpsell');
+  var upsellText = document.getElementById('upsellText');
+  if (answers.type === 'temporaire') {
+    upsell.style.display = 'block';
+    upsellText.textContent = '💡 Saviez-vous qu\'une assurance permanente pourrait vous protéger à vie pour seulement ' + formatPrime(r.prime * 3.5) + '/mois ? Demandez une comparaison complète à votre conseiller.';
+  } else if (answers.health === 'Y') {
+    upsell.style.display = 'block';
+    upsellText.textContent = '⚠️ Avec des antécédents médicaux, votre prime réelle peut différer. Un conseiller peut analyser votre dossier et trouver la meilleure solution disponible pour vous.';
+  }
+  var resultCard = document.getElementById('resultCard');
+  resultCard.classList.add('active');
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('progressLabel').textContent = '✓ Complété';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function bookMeeting() {
+  window.open('https://api.leadconnectorhq.com/widget/booking/nI6mhsdFgWeWE61pGz1g', '_blank');
+}
+
+// ── INIT ──
+updateAge(35);
+updateMontant(24);
+</script>
+</body>
+</html>
